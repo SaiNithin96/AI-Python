@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Local Chatbot</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background-attachment: fixed;
+            color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h2 {
+            color: #ffffff;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.6);
+        }
+
+        #chat-box {
+            width: 90%;
+            max-width: 600px;
+            background-color: rgba(20, 20, 20, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            height: 320px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        .message {
+            margin: 12px 0;
+            padding: 12px 18px;
+            border-radius: 16px;
+            max-width: 75%;
+            display: inline-block;
+            line-height: 1.4;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .user {
+            background: linear-gradient(145deg, #1e90ff, #00bfff);
+            color: #fff;
+            align-self: flex-end;
+            float: right;
+            clear: both;
+        }
+
+        .bot {
+            background: linear-gradient(145deg, #ff416c, #ff4b2b);
+            color: #fff;
+            float: left;
+            clear: both;
+        }
+
+        #user-input {
+            padding: 14px;
+            width: calc(100% - 120px);
+            border: none;
+            border-radius: 30px;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 1em;
+            outline: none;
+        }
+
+        button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 30px;
+            background: #00d4ff;
+            color: #001f33;
+            font-weight: 600;
+            font-size: 1em;
+            margin-left: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00b6e6;
+        }
+
+        .chat-input {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 90%;
+            max-width: 600px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h2>How Can I Help You</h2>
+    <div id="chat-box"></div>
+    <div class="chat-input">
+        <input type="text" id="user-input" placeholder="Type a message..." autofocus>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById("chat-box");
+
+        function sendMessage() {
+            const inputField = document.getElementById("user-input");
+            const userMessage = inputField.value.trim();
+            if (!userMessage) return;
+
+            appendMessage("user", userMessage);
+            inputField.value = "";
+
+            fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userMessage })
+            })
+            .then(res => res.json())
+            .then(data => appendMessage("bot", data.response));
+        }
+
+        function appendMessage(sender, message) {
+            const msgDiv = document.createElement("div");
+            msgDiv.className = `message ${sender}`;
+            msgDiv.textContent = `${sender === 'user' ? 'You' : 'Bot'}: ${message}`;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        document.getElementById("user-input").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") sendMessage();
+        });
+    </script>
+</body>
+</html>
